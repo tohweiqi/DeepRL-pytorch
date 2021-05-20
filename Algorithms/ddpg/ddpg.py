@@ -75,7 +75,7 @@ class DDPG:
         self.actor_critic = get_actor_critic_module(ac_kwargs, 'ddpg')
         self.ac_kwargs = ac_kwargs
         self.ac = self.actor_critic(self.env.observation_space, self.env.action_space, device=self.device, ngpu=self.ngpu, **ac_kwargs)
-        self.ac_targ = deepcopy(self.ac)
+        self.ac_targ = self.actor_critic(self.env.observation_space, self.env.action_space, device=self.device, ngpu=self.ngpu, **ac_kwargs)
 
         # Freeze target networks with respect to optimizers
         for p in self.ac_targ.parameters():

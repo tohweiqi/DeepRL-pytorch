@@ -94,7 +94,7 @@ def main():
         random_test(env_fn, render=args.render, record_dir=save_dir, timesteps=args.timesteps)
         return
 
-    save_dir = os.path.join("Model_Weights", args.env, args.agent.lower(), "vae")
+    save_dir = os.path.join("Model_Weights", args.env, args.agent.lower())
     config_path = os.path.join(save_dir, args.agent.lower() + "_config.json")
     logger_kwargs = {
         "output_dir": save_dir

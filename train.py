@@ -3,6 +3,7 @@ import pybullet_envs
 import argparse
 import os
 import json
+import torch
 
 from Wrappers.normalize_observation import Normalize_Observation
 from Wrappers.serialize_env import Serialize_Env
@@ -24,6 +25,7 @@ def parse_arguments():
     parser.add_argument('--view', type=str, default='front_rgb', 
                         choices=['wrist_rgb', 'front_rgb', 'left_shoulder_rgb', 'right_shoulder_rgb'], 
                         help='choose the type of camera view to generate image (only for RLBench envs)')
+    parser.add_argument('--max_ep_len', type=int, default=200, help='maximum episode length')
     return parser.parse_args()
 
 def main():
@@ -31,15 +33,15 @@ def main():
     if args.rlbench:
         import rlbench.gym
         if args.normalize:
-            env_fn = lambda: Normalize_Observation(RLBench_Wrapper(gym.make(args.env), args.view))
+            env_fn = lambda: Normalize_Observation(RLBench_Wrapper(gym.make(args.env, max_episode_length = args.max_ep_len), args.view))
         else:
-            env_fn = lambda: RLBench_Wrapper(gym.make(args.env), args.view)
+            env_fn = lambda: RLBench_Wrapper(gym.make(args.env, max_episode_length = args.max_ep_len), args.view)
     elif args.normalize:
-        env_fn = lambda: Normalize_Observation(gym.make(args.env))
+        env_fn = lambda: Normalize_Observation(gym.make(args.env, max_episode_length = args.max_ep_len))
     elif args.image:
-        env_fn = lambda: Image_Wrapper(gym.make(args.env))
+        env_fn = lambda: Image_Wrapper(gym.make(args.env, max_episode_length = args.max_ep_len))
     else:
-        env_fn = lambda: Serialize_Env(gym.make(args.env))
+        env_fn = lambda: Serialize_Env(gym.make(args.env, max_episode_length = args.max_ep_len))
         
     config_path = os.path.join("Algorithms", args.agent.lower(), args.agent.lower() + "_config.json")
     save_dir = os.path.join("Model_Weights", args.env, args.agent.lower())
@@ -49,6 +51,7 @@ def main():
     with open(config_path, 'r') as f:
         model_kwargs = json.load(f)
         model_kwargs['ngpu'] = args.ngpu
+        model_kwargs['max_ep_len'] = args.max_ep_len
         
     if args.agent.lower() == 'ddpg':
         from Algorithms.ddpg.ddpg import DDPG
@@ -110,4 +113,5 @@ def main():
     model.learn(args.timesteps, args.num_trials) 
 
 if __name__=='__main__':
+    print("test cuda: ", torch.cuda.is_available())
     main()
