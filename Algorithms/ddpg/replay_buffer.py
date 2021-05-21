@@ -16,6 +16,7 @@ class ReplayBuffer:
         size = int(size)
         self.buffer = deque(maxlen=size)
         self.max_size = size
+        self.size = 0
 
     def append(self, state, action, reward, next_state, terminal):
         '''
@@ -26,6 +27,8 @@ class ReplayBuffer:
             next_state (Numpy ndarray): The next state. 
             terminal (integer): 1 if the next state is a terminal state and 0 otherwise.
         '''
+        if self.size < self.max_size:
+            self.size += 1
         self.buffer.append([state, action, reward, next_state, terminal])
 
     def sample(self, batch_size):
@@ -36,27 +39,10 @@ class ReplayBuffer:
         Returns:
             A list of transition tuples including state, action, reward, next state and terminal
         '''
-        sample = random.sample(self.buffer, batch_size)
-        states = []
-        actions = []
-        rewards = []
-        terminals = []
-        next_states = []
-        for experience in sample:
-            state, action, reward, next_state, terminal = experience
-            states.append(state)
-            actions.append(action)
-            rewards.append(reward)
-            terminals.append(terminal)
-            next_states.append(next_state)
+        idxs = np.random.choice(self.size, size=batch_size, replace=False)
+        batch = [self.buffer[i] for i in idxs]
+        return [np.asarray(x, dtype="float32") for x in list(zip(*batch))]
         
-        states = torch.as_tensor(states, dtype=torch.float32)
-        actions = torch.as_tensor(actions, dtype=torch.float32)
-        rewards = torch.as_tensor(rewards, dtype=torch.float32)
-        next_states = torch.as_tensor(next_states, dtype=torch.float32)
-        terminals = torch.as_tensor(terminals, dtype=torch.float32)
-        return states, actions, rewards, next_states, terminals
-
     def size(self):
         '''
         Return the current size of the replay buffer

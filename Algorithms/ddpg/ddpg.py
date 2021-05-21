@@ -139,11 +139,11 @@ class DDPG:
         self.ac.train()
         self.ac_targ.train()
         states, actions, rewards, next_states, terminals = experiences
-        states = states.to(self.device)
-        next_states = next_states.to(self.device)
-        actions = actions.to(self.device)
-        rewards = rewards.to(self.device)
-        terminals = terminals.to(self.device)
+        states = torch.from_numpy(states).to(self.device)
+        next_states = torch.from_numpy(next_states).to(self.device)
+        actions = torch.from_numpy(actions).to(self.device)
+        rewards = torch.from_numpy(rewards).to(self.device)
+        terminals = torch.from_numpy(terminals).to(self.device)
 
         # --------------------- Optimizing critic ---------------------
         self.q_optimizer.zero_grad()
@@ -196,7 +196,11 @@ class DDPG:
         '''
         self.ac.eval()
         self.ac_targ.eval()
-        obs = torch.as_tensor([obs], dtype=torch.float32).to(self.device)
+        
+        #print("test: ", torch.FloatTensor([obs]).to(self.device).size())
+        #print("compare: ", torch.as_tensor([obs], dtype=torch.float32).to(self.device).size())
+        obs = np.expand_dims(obs, axis=0)
+        obs = torch.from_numpy(np.asarray(obs,dtype="float32")).to(self.device)
         action = self.ac.act(obs).squeeze()
         if len(action.shape) == 0:
             action = np.array([action])
