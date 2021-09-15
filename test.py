@@ -58,7 +58,7 @@ def random_test(env_fn, render=True, record_dir=None, timesteps=None):
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--env', type=str, default='AntBulletEnv-v0', help='environment_id')
-    parser.add_argument('--agent', type=str, default='ppo', choices=['ddpg', 'trpo', 'ppo', 'td3', 'option_critic', 'dac_ppo', 'random'], help='specify type of agent')
+    parser.add_argument('--agent', type=str, default='ppo', choices=['ddpg', 'trpo', 'ppo', 'td3', 'option_critic-cnn', 'option_critic-vae', 'dac_ppo', 'random'], help='specify type of agent')
     parser.add_argument('--render', action='store_true', help='if true, display human renders of the environment')
     parser.add_argument('--gif', action='store_true', help='if true, make gif of the trained agent')
     parser.add_argument('--timesteps', type=int, help='specify number of timesteps to train for')
@@ -76,7 +76,7 @@ def main():
     if args.rlbench:
         import rlbench.gym
         if args.normalize:
-            env_fn = lambda: Normalize_Observation(RLBench_Wrapper(gym.make(args.env), args.view))
+            env_fn = lambda: Normalize_Observation(RLBench_Wrapper(gym.make(args.env, render_mode='rgb_array'), args.view))
         else:
             env_fn = lambda: RLBench_Wrapper(gym.make(args.env, render_mode='rgb_array'), args.view)
     elif args.normalize:
@@ -93,9 +93,18 @@ def main():
 
         random_test(env_fn, render=args.render, record_dir=save_dir, timesteps=args.timesteps)
         return
-
-    save_dir = os.path.join("Model_Weights", args.env, args.agent.lower())
-    config_path = os.path.join(save_dir, args.agent.lower() + "_config.json")
+    
+    if args.agent.lower() == 'option_critic-cnn':
+        #save_dir = os.path.join("Model_Weights", args.env, 'option_critic/cnn')
+        save_dir = os.path.join("Model_Weights", args.env, 'oc_conv')
+        config_path = os.path.join(save_dir, "option_critic_config.json")
+    elif args.agent.lower() == 'option_critic-vae':
+        #save_dir = os.path.join("Model_Weights", args.env, 'option_critic/vae')
+        save_dir = os.path.join("Model_Weights", args.env, 'oc_vae')
+        config_path = os.path.join(save_dir, "option_critic_config.json")
+    else:
+        save_dir = os.path.join("Model_Weights", args.env, args.agent.lower())
+        config_path = os.path.join(save_dir, args.agent.lower() + "_config.json")
     logger_kwargs = {
         "output_dir": save_dir
     }
@@ -126,7 +135,7 @@ def main():
         model = PPO(env_fn, save_dir, seed=args.seed, logger_kwargs=logger_kwargs, **model_kwargs)
         model.load_weights()
 
-    elif args.agent.lower() == 'option_critic':
+    elif args.agent.lower()[:13] == 'option_critic':
         if not args.rlbench:
             env = env_fn()
             from gym.spaces import Box

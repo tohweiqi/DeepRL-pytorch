@@ -1,6 +1,5 @@
 import argparse
 import gym
-import pybullet_envs
 import os
 from PIL import Image
 from tqdm import tqdm

@@ -15,6 +15,7 @@ from torch.optim import Adam
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 
+
 class DDPG:
     def __init__(self, env_fn, save_dir, ac_kwargs=dict(), seed=0, tensorboard_logdir = None,
          replay_size=int(1e6), gamma=0.99, 
@@ -339,6 +340,7 @@ class DDPG:
                     if self.env.spec.reward_threshold is not None and self.best_mean_reward >= self.env.spec.reward_threshold:
                         print("Solved Environment, stopping iteration...")
                         return
+                
 
                 # self.evaluate_agent()
                 self.logger.dump()

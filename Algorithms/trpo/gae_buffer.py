@@ -117,8 +117,8 @@ class GAEBuffer:
         self.ptr, self.path_start_idx = 0, 0
         # The next line implement the advantage normalization trick to reduce variance
         self.adv_buf = (self.adv_buf - self.adv_buf.mean()) / self.adv_buf.std()
-        return dict(obs=torch.Tensor(self.obs_buf).to(self.device),
-                    act=torch.Tensor(self.act_buf).to(self.device),
-                    ret=torch.Tensor(self.ret_buf).to(self.device),
-                    adv=torch.Tensor(self.adv_buf).to(self.device),
-                    logp=torch.Tensor(self.logp_buf).to(self.device))
+        return dict(obs=torch.from_numpy(self.obs_buf).to(self.device),
+                    act=torch.from_numpy(self.act_buf).to(self.device),
+                    ret=torch.from_numpy(self.ret_buf).to(self.device),
+                    adv=torch.from_numpy(self.adv_buf).to(self.device),
+                    logp=torch.from_numpy(self.logp_buf).to(self.device))

@@ -327,7 +327,8 @@ class TRPO:
         for epoch in tqdm(range(epochs)):
             for t in range(self.steps_per_epoch):
                 # step the environment
-                a, v, logp = self.ac.step(torch.as_tensor(obs, dtype=torch.float32).to(self.device))
+                obs = np.asarray(obs,dtype="float32")
+                a, v, logp = self.ac.step(torch.from_numpy(obs).to(self.device))
                 next_obs, reward, done, _ = self.env.step(a)
                 ep_ret += reward
                 ep_len += 1
@@ -343,7 +344,8 @@ class TRPO:
                 # End of trajectory/episode handling
                 if terminal or epoch_ended:
                     if timeout or epoch_ended:
-                        _, v, _ = self.ac.step(torch.as_tensor(obs, dtype=torch.float32).to(self.device))
+                        obs = torch.from_numpy(np.asarray(obs,dtype="float32")).to(self.device)
+                        _, v, _ = self.ac.step(obs)
                     else:
                         v = 0
 
@@ -420,7 +422,8 @@ class TRPO:
         if timesteps is not None:
             for i in range(timesteps):
                 # Take stochastic action with policy network
-                action, _, _ = self.ac.step(torch.as_tensor(obs, dtype=torch.float32).to(self.device))
+                obs = torch.from_numpy(np.asarray(obs,dtype="float32")).to(self.device)
+                action, _, _ = self.ac.step(obs)
                 obs, reward, done, _ = self.env.step(action)
                 if record:
                     img.append(self.env.render('rgb_array'))
@@ -431,7 +434,8 @@ class TRPO:
         else:
             while not (done or (ep_len==self.max_ep_len)):
                 # Take stochastic action with policy network
-                action, _, _ = self.ac.step(torch.as_tensor(obs, dtype=torch.float32).to(self.device))
+                obs = torch.from_numpy(np.asarray(obs,dtype="float32")).to(self.device)
+                action, _, _ = self.ac.step(obs)
                 obs, reward, done, _ = self.env.step(action)
                 if record:
                     img.append(self.env.render('rgb_array'))

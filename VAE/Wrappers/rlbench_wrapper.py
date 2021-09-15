@@ -26,4 +26,4 @@ class RLBench_Wrapper(gym.ObservationWrapper):
         return self.observation(observation)
 
     def observation(self, observation):
-        return (observation[self.view] * 255).astype(np.uint8)
+        return (observation[self.view]).astype(np.uint8)

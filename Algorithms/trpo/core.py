@@ -117,7 +117,7 @@ class MLPGaussianActor(Actor):
         '''
         super().__init__()
         log_std = -0.5*np.ones(act_dim, dtype=np.float32)
-        self.log_std = torch.nn.Parameter(torch.as_tensor(log_std))
+        self.log_std = torch.nn.Parameter(torch.from_numpy(log_std))
         self.mu_net = mlp([obs_dim] + list(hidden_sizes) + [act_dim], activation)
         self.mu_net[-2].weight.data /= 100 # last layer is Identity, so we tweak second last layer weights
     
@@ -342,7 +342,7 @@ class CNNGaussianActor(Actor):
         '''
         super().__init__()
         log_std = -0.5*np.ones(act_dim, dtype=np.float32)
-        self.log_std = torch.nn.Parameter(torch.as_tensor(log_std))
+        self.log_std = torch.nn.Parameter(torch.from_numpy(log_std))
         
         self.mu_cnn = cnn(obs_dim[0], conv_layer_sizes, activation, batchnorm=True)
         self.start_dim = self.calc_shape(obs_dim, self.mu_cnn)
@@ -556,7 +556,7 @@ class VAEGaussianActor(Actor):
         '''
         super().__init__()
         log_std = -0.5*np.ones(act_dim, dtype=np.float32)
-        self.log_std = torch.nn.Parameter(torch.as_tensor(log_std))
+        self.log_std = torch.nn.Parameter(torch.from_numpy(log_std))
 
         self.mu_vae = VAE()
         mlp_sizes = [self.mu_vae.latent_dim] + list(hidden_sizes) + [act_dim]
