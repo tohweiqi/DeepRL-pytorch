@@ -370,6 +370,7 @@ class Option_Critic:
                 actions = mean
 
                 next_states, rewards, terminals, _ = self.env.step(to_np(actions[0]))
+                #print(next_states.shape)
                 is_initial_states = to_tensor(terminals).unsqueeze(-1).byte()
                 prev_options = options
                 states = next_states
