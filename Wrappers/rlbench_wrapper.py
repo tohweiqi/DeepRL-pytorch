@@ -16,14 +16,19 @@ class RLBench_Wrapper(gym.ObservationWrapper):
         Args:
             view (str): Dictionary key to specify which camera view to use. 
                         RLBench observation comes in a dictionary of
-                        ['state', 'left_shoulder_rgb', 'right_shoulder_rgb', 'wrist_rgb', 'front_rgb']
+                        ['state', 'left_shoulder-rgb', 'right_shoulder-rgb', 'wrist-rgb', 'front-rgb'
+                        'left_shoulder-rgbd', 'right_shoulder-rgbd', 'wrist-rgbd', 'front-rgbd']
         '''
         super(RLBench_Wrapper, self).__init__(env)
-        self.view = view
-        if len(self.observation_space[view].shape) == 3:
+        self.view, self.viewtype = view.split('-')
+        if self.viewtype == 'rgb':
             # swap (128, 128, 3) into (3, 128, 128) for torch input
-            H, W, C = self.observation_space[view].shape
+            H, W, C = self.observation_space[self.view+'_rgb'].shape
             self.observation_space = Box(0.0, 1.0, (C, H, W), dtype=np.float32)
+        elif self.viewtype == 'rgbd':
+            # swap (128, 128, 3) and (128, 128) into (4, 128, 128) for torch input
+            H, W, C = self.observation_space[self.view+'_rgb'].shape
+            self.observation_space = Box(0.0, 1.0, (C+1, H, W), dtype=np.float32)
         else:
             self.observation_space = self.observation_space[view]
 
@@ -32,7 +37,15 @@ class RLBench_Wrapper(gym.ObservationWrapper):
         return self.observation(observation)
 
     def observation(self, observation):
-        return observation[self.view].transpose([2, 0, 1])
+        #print(observation.keys())
+        if self.viewtype == 'rgb':
+            return observation[self.view+'_rgb'].transpose([2, 0, 1])
+        elif self.viewtype == 'rgbd':
+            rgbd_obs = np.dstack((observation[self.view+'_rgb'], observation[self.view+'_depth']))
+            print(rgbd_obs.transpose([2, 0, 1]).shape)
+            return rgbd_obs.transpose([2, 0, 1])
+        elif self.viewtype == 'depth':
+            return observation[self.view+'_depth']
     
     def save(self, fname):
         return

@@ -23,7 +23,7 @@ def parse_arguments():
     parser.add_argument('--rlbench', action='store_true', help='if true, use rlbench environment wrappers')
     parser.add_argument('--image', action='store_true', help='if true, use image environment wrappers')
     parser.add_argument('--view', type=str, default='front_rgb', 
-                        choices=['wrist_rgb', 'front_rgb', 'left_shoulder_rgb', 'right_shoulder_rgb'], 
+                        choices=['wrist-rgb', 'front-rgb', 'left_shoulder-rgb', 'right_shoulder-rgb', 'wrist-rgbd', 'front-rgbd', 'left_shoulder-rgbd', 'right_shoulder-rgbd'], 
                         help='choose the type of camera view to generate image (only for RLBench envs)')
     parser.add_argument('--max_ep_len', type=int, default=200, help='maximum episode length')
     return parser.parse_args()
