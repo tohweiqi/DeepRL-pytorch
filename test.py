@@ -1,5 +1,4 @@
 import gym
-import pybullet_envs
 import argparse
 import os
 import json
