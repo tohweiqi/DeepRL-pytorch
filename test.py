@@ -68,6 +68,8 @@ def parse_arguments():
     parser.add_argument('--view', type=str, default='wrist-rgb', 
                         choices=['wrist-rgb', 'front-rgb', 'left_shoulder-rgb', 'right_shoulder-rgb', 'wrist-rgbd', 'front-rgbd', 'left_shoulder-rgbd', 'right_shoulder-rgbd'], 
                         help='choose the type of camera view to generate image (only for RLBench envs)')
+    parser.add_argument('--max_ep_len', type=int, default=200, help='maximum episode length')
+    parser.add_argument('--rewards', type=int, default=0, help='reward type')
     return parser.parse_args()
 
 def main():
@@ -75,9 +77,9 @@ def main():
     if args.rlbench:
         import rlbench.gym
         if args.normalize:
-            env_fn = lambda: Normalize_Observation(RLBench_Wrapper(gym.make(args.env, render_mode='rgb_array'), args.view))
+            env_fn = lambda: Normalize_Observation(RLBench_Wrapper(gym.make(args.env, render_mode='rgb_array', max_episode_length = args.max_ep_len, dense_rewards = args.rewards), args.view))
         else:
-            env_fn = lambda: RLBench_Wrapper(gym.make(args.env, render_mode='rgb_array'), args.view)
+            env_fn = lambda: RLBench_Wrapper(gym.make(args.env, render_mode='rgb_array', max_episode_length = args.max_ep_len, dense_rewards = args.rewards), args.view)
     elif args.normalize:
         env_fn = lambda: Normalize_Observation(gym.make(args.env))
     elif args.image:
